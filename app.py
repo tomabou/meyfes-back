@@ -1,4 +1,5 @@
 from lib.transform import transform_main, show_img
+from lib.server import get_image_file
 import numpy as np
 import cv2
 
@@ -8,16 +9,14 @@ app = Flask(__name__)
 
 
 @app.route("/", methods=['POST'])
-def hello():
-    print("hello")
-    print(request.files)
-    if request.files['image']:
-        print("world")
-        stream = request.files['image'].stream
-        img_array = np.asarray(bytearray(stream.read()), dtype=np.uint8)
-        img = cv2.imdecode(img_array, 1)
-        show_img(img)
+def post():
+    img = get_image_file(request)
     return "Hello World!"
+
+
+@app.route("/", methods=['GET'])
+def get():
+    return "Hello World!!"
 
 
 def main():

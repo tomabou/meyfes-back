@@ -8,8 +8,13 @@ import random
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 
+import ssl
+
 app = Flask(__name__)
 CORS(app)
+context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+context.load_cert_chain("../tomabou.com/cert1.pem",
+                        "../tomabou.com/privkey1.pem")
 
 
 def get_file_path(image_id):
@@ -42,7 +47,7 @@ def acme():
 
 
 def main():
-    app.run(host="127.0.0.1", port=3000)
+    app.run(host="0.0.0.0", port=443, ssl_context=context)
 
 
 if __name__ == '__main__':

@@ -36,6 +36,7 @@ def get():
     return send_file(file_path)
 
 
+@app.route("/.well-known/acme-challenge/hdkSYOSCG9sYOfINYJSyFqindc6k6ixi76g1ANcYY7M")
 def acme():
     return send_file("./acme")
 

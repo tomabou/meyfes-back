@@ -1,22 +1,26 @@
 from lib.transform import transform_main, show_img
-from lib.server import get_image_file
+from lib.server import get_image_file, create_raw_file
 import numpy as np
 import cv2
 
-from flask import Flask, request
+from flask import Flask, request, send_file, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route("/", methods=['POST'])
 def post():
     img = get_image_file(request)
-    return "Hello World!"
+    img = transform_main(img)
+    data = create_raw_file(img)
+    return jsonify({'image_url': 'http://localhost:5000'})
 
 
 @app.route("/", methods=['GET'])
 def get():
-    return "Hello World!!"
+    return send_file("./image/test.jpg", mimetype='image/jpeg')
 
 
 def main():

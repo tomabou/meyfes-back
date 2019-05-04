@@ -1,5 +1,5 @@
-from lib.transform import transform_main, show_img
-from lib.server import get_image_file, create_raw_file
+from lib import transform
+from lib import server
 import numpy as np
 import cv2
 import os
@@ -18,8 +18,8 @@ def get_file_path(image_id):
 
 @app.route("/", methods=['POST'])
 def post():
-    img = get_image_file(request)
-    img = transform_main(img)
+    img = server.get_image_file(request)
+    img = transform.transform_main(img)
     image_id = random.randint(1, 1e20)
     cv2.imwrite(get_file_path(image_id), img)
 
@@ -42,7 +42,7 @@ def acme():
 
 
 def main():
-    app.run(host="127.0.0.1", port=3000)
+    app.run(host="0.0.0.0", port=80)
 
 
 if __name__ == '__main__':

@@ -65,8 +65,6 @@ def get_image_area(img):
 def get_square_contours(binary):
     contours, hierarchy = cv2.findContours(
         binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # hierarchy情報を無視し居ている
-    # 一番上下関係があったらrootから遠い方を取るとかした方が本当は良いと思っているが
     squares = []
     for c in contours:
         area = get_image_area(binary)

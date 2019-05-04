@@ -23,7 +23,7 @@ def post():
     image_id = random.randint(1, 1e20)
     cv2.imwrite(get_file_path(image_id), img)
 
-    return jsonify({'image_url': 'http://localhost:5000?id={}'.format(image_id)})
+    return jsonify({'image_url': 'https://tomabou.com:5000?id={}'.format(image_id)})
 
 
 @app.route("/", methods=['GET'])
@@ -33,7 +33,11 @@ def get():
     if not os.path.exists(file_path):
         file_path = "./image/test.jpg"
 
-    return send_file(file_path, )
+    return send_file(file_path)
+
+
+def acme():
+    return send_file("./acme")
 
 
 def main():

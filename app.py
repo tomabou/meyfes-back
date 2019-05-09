@@ -1,4 +1,4 @@
-from lib import transform
+from lib import transform, maze
 from lib import server
 import numpy as np
 import cv2
@@ -24,7 +24,13 @@ def get_file_path(image_id):
 @app.route("/", methods=['POST'])
 def post():
     img = server.get_image_file(request)
-    img = transform.transform_main(img)
+    img = transform.transform_main(img, (40, 30))
+    graph = maze.create_graph(img)
+    img_path = maze.create_graph_image(graph, 'test.png')
+    graph_string = maze.create_graph_string(graph)
+    maze.save_graph_string(graph_string)
+    maze_list = maze.get_maze_list("graph2.txt")
+    img_path, _, _, _, _ = maze.create_maze_image(maze_list)
     image_id = random.randint(1, 1e20)
     cv2.imwrite(get_file_path(image_id), img)
 

@@ -161,7 +161,7 @@ def create_graph_image(G, filename):
         width=2)
     pos = {n: (n[0], n[1]) for n in G.nodes()}
 
-    img_path = os.path.join('static', 'img_graph', filename)
+    img_path = os.path.join('image', filename)
     if os.path.exists(img_path):
         os.remove(img_path)
     plt.savefig(img_path)
@@ -216,7 +216,7 @@ def create_maze_image(maze_list):
                 gx, gy = i, j
                 # ゴール
             draw.rectangle((x, y, x1, y1), fill=colorthis, outline=color_1)
-    img_url2 = os.path.join('static', 'img_maze', 'pillow_imagedraw.jpg')
+    img_url2 = os.path.join('image', 'pillow_imagedraw.jpg')
     im.save(img_url2)
     return img_url2, sx, sy, gx, gy
 
@@ -224,7 +224,7 @@ def create_maze_image(maze_list):
 def create_maze_route_image(maze_list, sx, sy, gx, gy):
     bf, distance = clear_maze(sx, sy, gx, gy, maze_list)
     rootlist = makeroot(sx, sy, gx, gy, maze_list, distance)
-    diss[]
+    diss = []
     diss[-1].save(os.path.join('static', 'img_maze', 'pil2.jpg'))
     img_url3 = os.path.join('static', 'img_maze', 'pil2.jpg')
     print(img_url3)

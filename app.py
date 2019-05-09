@@ -18,7 +18,7 @@ context.load_cert_chain("../tomabou.com/cert1.pem",
 
 
 def get_file_path(image_id):
-    return "./image/"+str(image_id)+".png"
+    return "./image/" + str(image_id) + ".png"
 
 
 @app.route("/", methods=['POST'])
@@ -28,7 +28,8 @@ def post():
     image_id = random.randint(1, 1e20)
     cv2.imwrite(get_file_path(image_id), img)
 
-    return jsonify({'image_url': 'https://tomabou.com:5000?id={}'.format(image_id)})
+    return jsonify(
+        {'image_url': 'https://tomabou.com:5000?id={}'.format(image_id)})
 
 
 @app.route("/", methods=['GET'])
@@ -41,7 +42,8 @@ def get():
     return send_file(file_path)
 
 
-@app.route("/.well-known/acme-challenge/aSXLbUsQyS-wBgqH8PSn3jrq0gSaoQpJ5f6eJ2MFU7I")
+@app.route(
+    "/.well-known/acme-challenge/aSXLbUsQyS-wBgqH8PSn3jrq0gSaoQpJ5f6eJ2MFU7I")
 def acme():
     return send_file("./acme")
 

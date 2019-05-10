@@ -9,6 +9,7 @@ from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 
 import ssl
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -23,17 +24,19 @@ def get_file_path(image_id):
 
 @app.route("/", methods=['POST'])
 def post():
+    start = time.time()
     img = server.get_image_file(request)
     img = transform.transform_main(img, (40, 30))
     graph = maze.create_graph(img)
     img_path = maze.create_graph_image(graph, 'test.png')
-    graph_string = maze.create_graph_string(graph)
-    maze.save_graph_string(graph_string)
-    maze_list = maze.get_maze_list("graph2.txt")
+    graph_string = maze.create_graph_string(graph, )
+    maze.save_graph_string(graph_string, "./tmp/graph.txt")
+    maze_list = maze.get_maze_list("./tmp/graph.txt")
     img_path, _, _, _, _ = maze.create_maze_image(maze_list)
     image_id = random.randint(1, 1e20)
     cv2.imwrite(get_file_path(image_id), img)
-
+    end = time.time()
+    print("time: {}".format(end - start))
     return jsonify(
         {'image_url': 'https://tomabou.com:5000?id={}'.format(image_id)})
 

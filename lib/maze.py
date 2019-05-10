@@ -144,8 +144,8 @@ def create_graph_string(G):
     return graph_str
 
 
-def save_graph_string(graph_string):
-    with open("graph2.txt", "w") as f:
+def save_graph_string(graph_string, file_name):
+    with open(file_name, "w") as f:
         f.write(graph_string)
 
 
@@ -169,14 +169,13 @@ def create_graph_image(G, filename):
 
 
 def get_maze_list(input_file_name):
-    command = './bin/maze_creator < ' + input_file_name + ' > mazelist3.py'
+    command = './bin/maze_creator < ' + input_file_name + ' > ./tmp/mazelist'
     proc = subprocess.run(
         [command],
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
-    from mazelist3 import mazelist
-    ans = mazelist
+    ans = np.loadtxt("./tmp/mazelist", dtype=int)
     return ans
 
 

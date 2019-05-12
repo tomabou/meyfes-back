@@ -127,6 +127,27 @@ def create_graph(im_bin_50):
     return G
 
 
+def create_graph_from_list(data):
+    I = len(data)
+    J = len(data[0])
+    G = nx.Graph()
+    for i in range(I):
+        for j in range(J):
+            if data[i][j] == 0:
+                G.add_node((i, j))
+
+    for i in range(I):
+        for j in range(J - 1):
+            if data[i][j] == 0 and data[i][j + 1] == 0:
+                G.add_edge((i, j), (i, j + 1))
+
+    for i in range(I - 1):
+        for j in range(J):
+            if data[i][j] == 0 and data[i + 1][j] == 0:
+                G.add_edge((i, j), (i + 1, j))
+    return G
+
+
 def create_graph_string(G):
     str1 = list(G.nodes)
     str2 = list(G.edges)

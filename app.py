@@ -38,7 +38,18 @@ def post():
     end = time.time()
     print("time: {}".format(end - start))
     return jsonify(
-        {'image_url': 'https://tomabou.com:5000?id={}'.format(image_id)})
+        {'image_url': '?id={}'.format(image_id)})
+
+
+@app.route("/maze", methods=['POST'])
+def graph2maze():
+    data = request.json
+    graph = maze.create_graph_from_list(data)
+    graph_string = maze.create_graph_string(graph, )
+    maze.save_graph_string(graph_string, "./tmp/graph.txt")
+    maze_list = maze.get_maze_list("./tmp/graph.txt")
+    img_path, _, _, _, _ = maze.create_maze_image(maze_list)
+    return jsonify({'mazelist': maze_list.tolist()})
 
 
 @app.route("/", methods=['GET'])

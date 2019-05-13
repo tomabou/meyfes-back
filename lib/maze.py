@@ -197,6 +197,8 @@ def get_maze_list(input_file_name):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
     ans = np.loadtxt("./tmp/mazelist", dtype=int)
+    ans = np.transpose(ans)
+    ans = ans[:, ::-1]
     return ans
 
 

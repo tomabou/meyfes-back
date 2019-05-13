@@ -8,3 +8,5 @@ clear:
 
 run: build
 	flask run
+
+

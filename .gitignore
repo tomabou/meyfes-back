@@ -5,4 +5,5 @@ graph2.txt
 mazelist3.py
 tmp/graph.txt
 tmp/mazelist
+tmp/maze
 bin/maze_creator

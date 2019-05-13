@@ -48,6 +48,11 @@ def graph2maze():
     graph_string = maze.create_graph_string(graph, )
     maze.save_graph_string(graph_string, "./tmp/graph.txt")
     maze_list = maze.get_maze_list("./tmp/graph.txt")
+    start_goal = maze.get_maze_start_end(maze_list)
+    path_length, distance = maze.clear_maze(*start_goal, maze_list)
+    maze_list = maze.make_maze_with_route(
+        *start_goal, maze_list, distance, path_length + 1)
+    np.savetxt("tmp/maze", maze_list, fmt='%.03d')
     return jsonify({'mazelist': maze_list.tolist()})
 
 

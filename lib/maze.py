@@ -56,6 +56,33 @@ def clear_maze(sx, sy, gx, gy, maze):
 
     return bfs(), distance
 
+def get_maze_start_end(maze_list):
+    sx,sy,gx,gy=0,0,0,0
+    for i,xs in enumerate(maze_list):
+        for j,val in enumerate(xs):
+            if val ==2:
+                sx,sy = i,j
+            elif val == 3:
+                gx,gy = i,j
+    return sx,sy,gx,gy
+
+
+def make_maze_with_route(sx, sy, gx, gy, maze_list, distance, path_length):
+    field_x_length = len(maze_list)
+    field_y_length = len(maze_list[0])
+    x, y = gx, gy
+    count = 0
+    while x != sx or y != sy:
+        for i in range(0, 4):
+            nx, ny = x + [1, 0, -1, 0][i], y + [0, 1, 0, -1][i]
+            if(0 <= nx and nx < field_x_length and 0 <= ny and ny < field_y_length and maze_list[nx][ny] != 1 and distance[nx][ny] == distance[x][y] - 1):
+                maze_list[nx, ny] = path_length - count
+                x, y = nx, ny
+                break
+        count = count + 1
+    maze_list[gx,gy] = path_length+1 
+    return maze_list
+
 
 def makeroot(sx, sy, gx, gy, maze, distance):
     # ルートを画像として保存していく

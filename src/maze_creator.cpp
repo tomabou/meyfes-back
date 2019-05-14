@@ -28,8 +28,11 @@ node c[2 * N][2 * N]; //最終的なグラフの配列
 int xmin, xmax, ymin, ymax;     //迷路の右端、左端、下端、上端
 pair<int, int> start, goal;     //配列cの迷路におけるスタート、ゴールの座標
 pair<int, int> searchv;         //deadendmoveで次数3以上の頂点を見つけるために使う頂点座標
+pair<int, int> presearchv;      //deadendmoveがちゃんと機能するか前調べするときに使う頂点座標
+pair<int, int> presearchu;      //deadendmoveがちゃんと機能するか前調べするときに使う頂点座標
 int direction;                  //deadendmoveで前にどの方向から来たかを記録する、0は下、1は上、2は左、3は右
 queue<pair<int, int>> rightway; //解経路
+int deadcount;                  //deadendmove用のカウンター、deadendmoveに成功したら0、失敗したら1を返す
 
 //unionfind一式
 int par[4 * N * N];
@@ -508,22 +511,56 @@ void makemazeblank()
 }
 
 //次数1の2頂点を受け取って、その2頂点を結ぶ辺をつくり、代わりに新たな次数１の頂点をつくる関数
-void deadendmove(int x, int y, int z, int w)
+int deadendmove(int x, int y, int z, int w)
 {
-    //与えられたのがスタート、ゴールなら、deadendmoveは適用しない
-    if (x == start.first && y == start.second && z == goal.first && w == goal.second)
+    presearchu.first = x;
+    presearchu.second = y;
+    presearchv.first = z;
+    presearchv.second = w;
+    while (1)
     {
-        x = 0;
-        y = 0;
-        z = 2;
-        w = 2;
-    }
-    if (x == goal.first && y == goal.second && z == start.first && w == start.second)
-    {
-        x = 0;
-        y = 0;
-        z = 2;
-        w = 2;
+        //スタート、ゴールを通ったらdeadendmove不可能
+        if ((presearchv.first == start.first && presearchv.second == start.second) || (presearchv.first == goal.first && presearchv.second == goal.second))
+        {
+            return 1;
+        }
+        //次数3以上でスタート、ゴールでないならdeadendmove可能
+        if (c[presearchv.first][presearchv.second].key >= 3)
+        {
+            break;
+        }
+        //左に移動
+        if (c[presearchv.first][presearchv.second].left == 1 && (presearchu.first != presearchv.first - 1 || presearchu.second != presearchv.second))
+        {
+            presearchu.first = presearchv.first;
+            presearchu.second = presearchv.second;
+            presearchv.first = presearchv.first - 1;
+            continue;
+        }
+        //右に移動
+        if (c[presearchv.first][presearchv.second].right == 1 && (presearchu.first != presearchv.first + 1 || presearchu.second != presearchv.second))
+        {
+            presearchu.first = presearchv.first;
+            presearchu.second = presearchv.second;
+            presearchv.first = presearchv.first + 1;
+            continue;
+        }
+        //上に移動
+        if (c[presearchv.first][presearchv.second].up == 1 && (presearchu.first != presearchv.first || presearchu.second != presearchv.second + 1))
+        {
+            presearchu.first = presearchv.first;
+            presearchu.second = presearchv.second;
+            presearchv.second = presearchv.second + 1;
+            continue;
+        }
+        //下に移動
+        if (c[presearchv.first][presearchv.second].down == 1 && (presearchu.first != presearchv.first || presearchu.second != presearchv.second - 1))
+        {
+            presearchu.first = presearchv.first;
+            presearchu.second = presearchv.second;
+            presearchv.second = presearchv.second - 1;
+            continue;
+        }
     }
     if (x == z && y == w - 1)
     {
@@ -576,7 +613,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -620,7 +657,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -664,7 +701,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -712,7 +749,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -756,7 +793,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -800,7 +837,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -848,7 +885,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -892,7 +929,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -936,7 +973,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -984,7 +1021,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -1028,7 +1065,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -1072,7 +1109,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -1133,7 +1170,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -1177,7 +1214,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -1221,7 +1258,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -1269,7 +1306,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -1313,7 +1350,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -1357,7 +1394,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -1405,7 +1442,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -1449,7 +1486,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -1493,7 +1530,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -1541,7 +1578,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -1585,7 +1622,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -1629,7 +1666,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -1690,7 +1727,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -1734,7 +1771,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -1778,7 +1815,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -1826,7 +1863,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -1870,7 +1907,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -1914,7 +1951,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -1962,7 +1999,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -2006,7 +2043,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -2050,7 +2087,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -2098,7 +2135,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -2142,7 +2179,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -2186,7 +2223,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -2247,7 +2284,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -2291,7 +2328,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -2335,7 +2372,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -2383,7 +2420,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -2427,7 +2464,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -2471,7 +2508,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -2519,7 +2556,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //右の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first + 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first + 1, searchv.second);
                         direction = 2;
@@ -2563,7 +2600,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -2607,7 +2644,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -2655,7 +2692,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //左の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first - 1][searchv.second].key == 2)
                     {
                         searchv = make_pair(searchv.first - 1, searchv.second);
                         direction = 3;
@@ -2699,7 +2736,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //下の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second - 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second - 1);
                         direction = 1;
@@ -2743,7 +2780,7 @@ void deadendmove(int x, int y, int z, int w)
                         break;
                     }
                     //上の頂点の次数が2なら
-                    else
+                    else if (c[searchv.first][searchv.second + 1].key == 2)
                     {
                         searchv = make_pair(searchv.first, searchv.second + 1);
                         direction = 0;
@@ -2753,6 +2790,7 @@ void deadendmove(int x, int y, int z, int w)
             }
         }
     }
+    return 0;
 }
 
 //迷路を作り変えて絵をわかりにくくする関数
@@ -2773,14 +2811,22 @@ void makemazecomplex()
         {
             if (c[i][j].key == 1)
             {
-                if (c[i + 1][j].key == 1)
+                if (c[i + 1][j].key == 1 && (i != start.first || j != start.second) && (i + 1 != start.first || j != start.second) && (i != goal.first || j != goal.second) && (i + 1 != goal.first || j != goal.second))
                 {
-                    deadendmove(i, j, i + 1, j);
+                    deadcount = deadendmove(i, j, i + 1, j);
+                    if (deadcount == 1)
+                    {
+                        deadendmove(i + 1, j, i, j);
+                    }
                     continue;
                 }
-                if (c[i][j + 1].key == 1)
+                if (c[i][j + 1].key == 1 && (i != start.first || j != start.second) && (i != start.first || j + 1 != start.second) && (i != goal.first || j != goal.second) && (i != goal.first || j + 1 != goal.second))
                 {
-                    deadendmove(i, j, i, j + 1);
+                    deadcount = deadendmove(i, j, i, j + 1);
+                    if (deadcount == 1)
+                    {
+                        deadendmove(i, j + 1, i, j);
+                    }
                     continue;
                 }
             }
@@ -2863,12 +2909,12 @@ int main()
     makemazeway();
     //迷路の地の部分をつくる
     makemazeblank();
-    //配列cのkeyを次数にするため、使わない頂点のkeyをMにすることで区別する
+    //配列cのkeyを次数にするため、使わない頂点のkeyを0にすることで区別する
     for (int i = 0; i < 2 * N; i++)
     {
         for (int j = 0; j < 2 * N; j++)
         {
-            c[i][j].key = M;
+            c[i][j].key = 0;
         }
     }
     //ヒューリスティックに迷路を作り変えて絵をわかりにくくする
@@ -3003,7 +3049,7 @@ int main()
     //         if(i%2==0 && j%2==0) cout << "#";
     //     }
     //     cout << endl;
-    //}
+    // }
 
     //迷路の表示、縦横の頂点数、辺（頂点の組で表す）による表示
     //cout << xmax-xmin+1 << endl; //横の頂点数

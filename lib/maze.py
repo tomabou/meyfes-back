@@ -144,17 +144,17 @@ def create_vertex_list(img):
 
 def create_edge_list(vertex):
     I,J = vertex.shape
-    edgeR = list()
+    edgeC = list()
     for i in range(I):
         for j in range(J-1):
             if vertex[i,j] == 1 and vertex[i,j+1] == 1:
-                edgeR.append(i*1000+j)
+                edgeC.append(i*1000+j)
 
-    edgeC = list()
+    edgeR = list()
     for i in range(I-1):
         for j in range(J):
             if vertex[i,j] == 1 and vertex[i+1,j] == 1:
-                edgeC.append(i*1000+j)
+                edgeR.append(i*1000+j)
     return edgeR,edgeC
 
 

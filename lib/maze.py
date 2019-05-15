@@ -133,6 +133,31 @@ def makeroot(sx, sy, gx, gy, maze, distance):
         count = count + 1
     return rootlist
 
+def create_vertex_list(img):
+    vertex = np.zeros(img.shape,dtype=int)
+    I,J = img.shape
+    for i in range(I):
+        for j in range(J):
+            if img[i,j] == 0:
+                vertex[i,j] = 1
+    return vertex
+
+def create_edge_list(vertex):
+    I,J = vertex.shape
+    edgeR = list()
+    for i in range(I):
+        for j in range(J-1):
+            if vertex[i,j] == 1 and vertex[i,j+1] == 1:
+                edgeR.append(i*1000+j)
+
+    edgeC = list()
+    for i in range(I-1):
+        for j in range(J):
+            if vertex[i,j] == 1 and vertex[i+1,j] == 1:
+                edgeC.append(i*1000+j)
+    return edgeR,edgeC
+
+
 
 def create_graph(im_bin_50):
     I, J = im_bin_50.shape

@@ -4,12 +4,14 @@ import numpy as np
 import cv2
 import os
 import random
+import sys
 
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 
 import ssl
 import time
+
 
 app = Flask(__name__)
 CORS(app)
@@ -23,7 +25,17 @@ def get_file_path(image_id):
 
 
 @app.route("/", methods=['POST'])
-def post():
+def create_grid_graph():
+    img = server.get_image_file(request)
+    img = transform.transform_main(img, (40, 30))
+    vertex = maze.create_vertex_list(img)
+    edgeR, edgeC = maze.create_edge_list(vertex)
+    return jsonify(
+        {"vertex": vertex.tolist(), "edgeR": edgeR, "edgeC": edgeC}
+    )
+
+
+def create_image():
     start = time.time()
     img = server.get_image_file(request)
     img = transform.transform_main(img, (40, 30))

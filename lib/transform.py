@@ -131,7 +131,7 @@ def second_binarize(img):
 def erode_dilate(img):
     img = 255 - img
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (31, 31))
-    kernel = np.ones((31, 31), dtype=np.uint8)
+    kernel = np.ones((6, 6), dtype=np.uint8)
     img = cv2.dilate(img, kernel, iterations=1)
     img = 255 - img
     return img
@@ -158,9 +158,10 @@ def transform_main(img, shape):
     squares = get_square_contours(binary)
     if not squares:
         img = simple_otsh(img)
+        img = clean_edge(img)
         img = erode_dilate(img)
         return cv2.resize(img, shape)
-    img = transform(img, squares[0], (1414, 1000))
+    img = transform(img, squares[0], (280, 200))
     img = second_binarize(img)
     img = clean_edge(img)
     img = erode_dilate(img)

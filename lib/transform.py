@@ -157,8 +157,9 @@ def transform_main(img, shape):
     #binary = HSV_otsh(img)
     squares = get_square_contours(binary)
     if not squares:
-        binary = simple_otsh(img)
-        return cv2.resize(binary, shape)
+        img = simple_otsh(img)
+        img = erode_dilate(img)
+        return cv2.resize(img, shape)
     img = transform(img, squares[0], (1414, 1000))
     img = second_binarize(img)
     img = clean_edge(img)

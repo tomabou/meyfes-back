@@ -24,6 +24,7 @@ struct node
 node a[N][N];         //入力グラフの配列
 bool b[N][N];         //幅優先探索で使う、絵画に含まれる頂点なら最初1で、連結成分検出の際に訪れたら0にする
 node c[2 * N][2 * N]; //最終的なグラフの配列
+node d[2 * N][2 * N]; //cをずらすときに使う
 
 int xmin, xmax, ymin, ymax;     //迷路の右端、左端、下端、上端
 pair<int, int> start, goal;     //配列cの迷路におけるスタート、ゴールの座標
@@ -422,7 +423,69 @@ void makemazeblank(int tate, int yoko)
     }
     else if ((xmax - xmin + 1) * tate < (ymax - ymin + 1) * yoko)
     {
-        xmax += (ymax - ymin + 1) * yoko / tate - xmax + xmin - 1;
+        int differ; //修正する差
+        differ = (ymax - ymin + 1) * yoko / tate - xmax + xmin - 1;
+        xmax += differ;
+        start.first += differ / 2;
+        goal.first += differ / 2;
+        //迷路を両側にマージンがあるように良い感じにずらす
+        for (int i = 0; i < 2 * N; i++)
+        {
+            for (int j = 0; j < 2 * N; j++)
+            {
+                if (c[i][j].dot == 1)
+                {
+                    c[i][j].dot = 0;
+                    d[i + differ / 2][j].dot = 1;
+                }
+                if (c[i][j].left == 1)
+                {
+                    c[i][j].left = 0;
+                    d[i + differ / 2][j].left = 1;
+                }
+                if (c[i][j].right == 1)
+                {
+                    c[i][j].right = 0;
+                    d[i + differ / 2][j].right = 1;
+                }
+                if (c[i][j].down == 1)
+                {
+                    c[i][j].down = 0;
+                    d[i + differ / 2][j].down = 1;
+                }
+                if (c[i][j].up == 1)
+                {
+                    c[i][j].up = 0;
+                    d[i + differ / 2][j].up = 1;
+                }
+            }
+        }
+        for (int i = 0; i < 2 * N; i++)
+        {
+            for (int j = 0; j < 2 * N; j++)
+            {
+                if (d[i][j].dot == 1)
+                {
+                    c[i][j].dot = 1;
+                }
+                if (d[i][j].up == 1)
+                {
+                    c[i][j].up = 1;
+                }
+                if (d[i][j].down == 1)
+                {
+                    c[i][j].down = 1;
+                }
+                if (d[i][j].left == 1)
+                {
+                    c[i][j].left = 1;
+                }
+                if (d[i][j].right == 1)
+                {
+                    c[i][j].right = 1;
+                }
+            }
+        }
     }
     //辺をベクターで管理
     vector<pair<pair<int, int>, pair<int, int>>> edge;
@@ -2869,7 +2932,12 @@ int main()
             c[i][j].left = 0;
             c[i][j].right = 0;
             c[i][j].up = 0;
-            c[i][j].down = 0;
+            d[i][j].down = 0;
+            d[i][j].dot = 0;
+            d[i][j].left = 0;
+            d[i][j].right = 0;
+            d[i][j].up = 0;
+            d[i][j].down = 0;
         }
     }
     //頂点の入力
@@ -2954,7 +3022,7 @@ int main()
             }
             if (i == xmax * 2 + 2)
             {
-                cout << "1 ";
+                cout << "1";
                 continue;
             }
             if (i % 2 == 1 && j % 2 == 1)

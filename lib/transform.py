@@ -151,12 +151,14 @@ def clean_edge(img):
 
 
 def transform_main(img, shape):
+    img = cv2.resize(img, (280, 200))
     binary = first_binarize(img)
     #binary = sinple_otsh(img)
     #binary = HSV_otsh(img)
     squares = get_square_contours(binary)
     if not squares:
-        return simple_otsh(img)
+        binary = simple_otsh(img)
+        return cv2.resize(binary, shape)
     img = transform(img, squares[0], (1414, 1000))
     img = second_binarize(img)
     img = clean_edge(img)

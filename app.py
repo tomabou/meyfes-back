@@ -28,6 +28,7 @@ def get_file_path(image_id):
 def create_grid_graph():
     img = server.get_image_file(request)
     img = transform.transform_main(img, (40, 30))
+    img = np.transpose(img)
     vertex = maze.create_vertex_list(img)
     edgeR, edgeC = maze.create_edge_list(vertex)
     return jsonify(

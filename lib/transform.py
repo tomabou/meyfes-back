@@ -53,10 +53,22 @@ def show_img(img):
     cv2.destroyAllWindows()
 
 
+def simple_otsh(img):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    _, binary = cv2.threshold(img, 0, 255, cv2.THRESH_OTSU)
+    return binary
+
+
+def HSV_otsh(img):
+    hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    _, binary = cv2.threshold(img[:, :, 0], 0, 255, cv2.THRESH_OTSU)
+    return binary
+
+
 def first_binarize(img):
     hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    lower_blue = np.array([10, 10, 10])
-    upper_blue = np.array([40, 250, 250])
+    lower_blue = np.array([0, 10, 10])
+    upper_blue = np.array([60, 250, 250])
     binary = cv2.inRange(hsv_img, lower_blue, upper_blue)
     return binary
 
@@ -74,7 +86,7 @@ def get_square_contours(binary):
     for c in contours:
         area = get_image_area(binary)
         if area * 0.01 < cv2.contourArea(c) < get_image_area(binary) * 0.95:
-            epsilon = 0.03 * cv2.arcLength(c, True)
+            epsilon = 0.07 * cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, epsilon, True)
             if len(approx) == 4:
                 squares.append(approx)
@@ -140,7 +152,11 @@ def clean_edge(img):
 
 def transform_main(img, shape):
     binary = first_binarize(img)
+    #binary = sinple_otsh(img)
+    #binary = HSV_otsh(img)
     squares = get_square_contours(binary)
+    if not squares:
+        return simple_otsh(img)
     img = transform(img, squares[0], (1414, 1000))
     img = second_binarize(img)
     img = clean_edge(img)

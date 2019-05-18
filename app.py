@@ -27,7 +27,7 @@ def get_file_path(image_id):
 @app.route("/", methods=['POST'])
 def create_grid_graph():
     img = server.get_image_file(request)
-    img = transform.transform_main(img, (40, 30))
+    img = transform.transform_main(img, (45, 30))
     img = np.transpose(img)
     vertex = maze.create_vertex_list(img)
     edgeR, edgeC = maze.create_edge_list(vertex)
@@ -39,10 +39,10 @@ def create_grid_graph():
 def create_image():
     start = time.time()
     img = server.get_image_file(request)
-    img = transform.transform_main(img, (40, 30))
+    img = transform.transform_main(img, (45, 30))
     graph = maze.create_graph(img)
     img_path = maze.create_graph_image(graph, 'test.png')
-    graph_string = maze.create_graph_string(graph, )
+    graph_string = maze.create_graph_string(graph, 1, 2)
     maze.save_graph_string(graph_string, "./tmp/graph.txt")
     maze_list = maze.get_maze_list("./tmp/graph.txt")
     img_path, _, _, _, _ = maze.create_maze_image(maze_list)
@@ -58,9 +58,8 @@ def create_image():
 def graph2maze():
     data = request.json
     graph = maze.create_graph_from_list(data)
-    graph_string = maze.create_graph_string(graph, )
-    maze.save_graph_string(graph_string, "./tmp/graph.txt")
-    maze_list = maze.get_maze_list("./tmp/graph.txt")
+    graph_string = maze.create_graph_string(graph, 3, 4)
+    maze_list = maze.get_maze_list_usepipe(graph_string)
     start_goal = maze.get_maze_start_end(maze_list)
     path_length, distance = maze.clear_maze(*start_goal, maze_list)
     maze_list = maze.make_maze_with_route(

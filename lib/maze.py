@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 import matplotlib.pyplot as plt
 import datetime
 import subprocess
+import io
 
 app = Flask(__name__)
 
@@ -200,10 +201,11 @@ def create_graph_from_list(data):
     return G
 
 
-def create_graph_string(G):
+def create_graph_string(G,tate,yoko):
     str1 = list(G.nodes)
     str2 = list(G.edges)
-    graph_str = str(len(G.nodes)) + "\n"
+    graph_str = "{} {}\n".format(tate,yoko)
+    graph_str += str(len(G.nodes)) + "\n"
     for i in range(len(str1)):
         graph_str += str(list(G.nodes)[i][0]) + \
             " " + str(list(G.nodes)[i][1]) + "\n"
@@ -241,11 +243,26 @@ def create_graph_image(G, filename):
     return img_path
 
 
+def get_maze_list_usepipe(input_string):
+    command = './bin/maze_creator '
+    proc = subprocess.Popen(
+        [command],
+        shell=True,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    ans_string = proc.communicate(input_string.encode())[0].decode()
+    ans = np.loadtxt(io.StringIO(ans_string), dtype=int)
+    ans = np.transpose(ans)
+    ans = ans[:, ::-1]
+    return ans
+
 def get_maze_list(input_file_name):
     command = './bin/maze_creator < ' + input_file_name + ' > ./tmp/mazelist'
     proc = subprocess.run(
         [command],
         shell=True,
+        stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
     ans = np.loadtxt("./tmp/mazelist", dtype=int)

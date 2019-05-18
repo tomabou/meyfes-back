@@ -123,9 +123,7 @@ def transform(img, contour, size):
 def second_binarize(img):
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     cv2.GaussianBlur(gray, (5, 5), 0)
-    show_img(gray)
     _,th2 = cv2.threshold(gray,127,255,cv2.THRESH_BINARY)
-    show_img(th2)
     #_, th2 = cv2.threshold(
     #    gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return th2
